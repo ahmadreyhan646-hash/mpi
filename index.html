@@ -1,0 +1,2144 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Mario World 2-2 — Pancasila Diving: Hak &amp; Kewajiban (SD 5)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --nes-blue: #0058F8;
+      --nes-sky: #6888FC;
+      --nes-black: #000000;
+      --nes-white: #FCFCFC;
+      --nes-gold: #FCA044;
+      --nes-yellow: #F8D878;
+      --nes-red: #D82800;
+      --nes-green: #00A800;
+      --nes-green-dark: #005800;
+      --nes-brown: #884400;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #0d1018;
+      color: var(--nes-white);
+      font-family: 'Press Start 2P', monospace;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Main Cabinet / Viewport Wrapper */
+    #game-shell {
+      position: relative;
+      width: 100%;
+      max-width: 960px;
+      height: 100%;
+      max-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: #000;
+      border: 4px solid #2b3042;
+      box-shadow: 0 14px 44px rgba(0, 0, 0, 0.9);
+    }
+
+    /* Canvas Container */
+    #canvas-wrapper {
+      position: relative;
+      width: 100%;
+      flex: 1 1 auto;
+      min-height: 0;
+      background-color: var(--nes-blue);
+      overflow: hidden;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+
+    /* Sound Toggle Button in Top Right */
+    #sound-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 25;
+      background: rgba(0, 0, 0, 0.72);
+      color: #FCFCFC;
+      border: 2px solid #FCFCFC;
+      border-radius: 6px;
+      padding: 6px 9px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 9px;
+      cursor: pointer;
+      transition: transform 0.08s;
+    }
+
+    #sound-btn:active {
+      transform: scale(0.94);
+    }
+
+    /* =========================================================================
+       CLASSIC NES COVER HOMESCREEN OVERLAY
+       ========================================================================= */
+    #homescreen-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 58px 14px 14px;
+      background: radial-gradient(circle at center, rgba(0, 40, 140, 0.15) 0%, rgba(0, 12, 48, 0.55) 100%);
+      overflow: hidden;
+    }
+
+    #homescreen-overlay.hidden {
+      display: none !important;
+    }
+
+    /* Diagonal Corner Ribbon: CLASSIC SERIES */
+    .classic-ribbon {
+      position: absolute;
+      top: 22px;
+      left: -46px;
+      width: 195px;
+      padding: 7px 0;
+      background: linear-gradient(180deg, #d8dce8 0%, #98a0b8 50%, #747c94 100%);
+      color: #000000;
+      font-size: 8.5px;
+      line-height: 1.35;
+      text-align: center;
+      transform: rotate(-42deg);
+      border-top: 3px solid #000;
+      border-bottom: 3px solid #000;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.65);
+      z-index: 24;
+      pointer-events: none;
+      letter-spacing: 0.5px;
+    }
+
+    /* Retro NES Cartridge Cover Frame */
+    .cover-card {
+      position: relative;
+      width: 100%;
+      max-width: 560px;
+      background: linear-gradient(180deg, rgba(0, 88, 248, 0.88) 0%, rgba(0, 48, 168, 0.94) 100%);
+      border: 4px solid #000000;
+      box-shadow:
+        0 0 0 3px #FCFCFC,
+        0 14px 32px rgba(0, 0, 0, 0.85),
+        inset 0 0 24px rgba(104, 136, 252, 0.45);
+      border-radius: 14px;
+      padding: 14px 16px 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    /* Mini Live Diorama Canvas inside Cover Box */
+    #cover-diorama {
+      width: 100%;
+      max-width: 440px;
+      height: 132px;
+      border: 3px solid #000000;
+      border-radius: 8px;
+      background: #0058F8;
+      margin-bottom: 12px;
+      box-shadow: inset 0 3px 0 rgba(255, 255, 255, 0.25);
+    }
+
+    /* Colorful Retro Pixel Title: MARIO WORLD 2-2 */
+    .cover-title {
+      margin: 0 0 8px;
+      font-size: clamp(16px, 3.6vw, 25px);
+      line-height: 1.35;
+      letter-spacing: 1px;
+      text-shadow:
+        3px 3px 0 #000000,
+        -2px -2px 0 #000000,
+        2px -2px 0 #000000,
+        -2px 2px 0 #000000,
+        0 5px 0 #000000;
+    }
+
+    .c-red { color: #F83800; }
+    .c-green { color: #58F858; }
+    .c-yellow { color: #F8D878; }
+    .c-blue { color: #68B8FC; }
+    .c-white { color: #FCFCFC; }
+    .c-orange { color: #FCA044; }
+
+    .cover-subtitle {
+      margin: 0 0 14px;
+      font-size: clamp(8.5px, 1.7vw, 10.5px);
+      line-height: 1.6;
+      color: #FCFCFC;
+      background: rgba(0, 0, 0, 0.52);
+      border: 2px solid #6888FC;
+      border-radius: 6px;
+      padding: 6px 10px;
+      text-shadow: 2px 2px 0 #000;
+    }
+
+    /* Home Action Buttons Row */
+    .home-btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+    }
+
+    .btn-play-now {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(13px, 2.5vw, 17px);
+      color: #FCFCFC;
+      background: linear-gradient(180deg, #f83800 0%, #c81c00 60%, #981000 100%);
+      border: 4px solid #000000;
+      box-shadow:
+        0 0 0 3px #FCFCFC,
+        0 7px 0 #000000,
+        inset 0 4px 0 rgba(255, 255, 255, 0.35);
+      border-radius: 14px;
+      padding: 14px 26px;
+      cursor: pointer;
+      text-shadow: 2px 2px 0 #000000;
+      letter-spacing: 1px;
+      animation: pulsePlay 1.4s infinite ease-in-out;
+      transition: transform 0.08s, filter 0.08s;
+    }
+
+    .btn-play-now:hover {
+      filter: brightness(1.12);
+    }
+
+    .btn-play-now:active {
+      transform: translateY(5px);
+      box-shadow:
+        0 0 0 3px #FCFCFC,
+        0 2px 0 #000000;
+    }
+
+    @keyframes pulsePlay {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.04); }
+    }
+
+    .btn-how-to {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(9.5px, 1.8vw, 11px);
+      color: #000000;
+      background: linear-gradient(180deg, #F8D878 0%, #FCA044 100%);
+      border: 3px solid #000000;
+      box-shadow:
+        0 0 0 2px #FCFCFC,
+        0 5px 0 #000000,
+        inset 0 3px 0 rgba(255, 255, 255, 0.45);
+      border-radius: 12px;
+      padding: 13px 16px;
+      cursor: pointer;
+      transition: transform 0.08s, filter 0.08s;
+    }
+
+    .btn-how-to:hover {
+      filter: brightness(1.08);
+    }
+
+    .btn-how-to:active {
+      transform: translateY(4px);
+      box-shadow:
+        0 0 0 2px #FCFCFC,
+        0 1px 0 #000000;
+    }
+
+    .press-start-hint {
+      margin-top: 11px;
+      font-size: 8.5px;
+      color: #F8D878;
+      text-shadow: 2px 2px 0 #000;
+      animation: blinkHint 1.1s steps(2, start) infinite;
+    }
+
+    @keyframes blinkHint {
+      to { visibility: hidden; }
+    }
+
+    /* =========================================================================
+       TOUCH CONTROLS DECK (ON-SCREEN D-PAD & SWIM BUTTON)
+       ========================================================================= */
+    #touch-controls {
+      flex: 0 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 16px;
+      background: linear-gradient(180deg, #1e212d 0%, #14161f 100%);
+      border-top: 4px solid #35394b;
+      gap: 12px;
+    }
+
+    #touch-controls.controls-dimmed {
+      opacity: 0.55;
+      pointer-events: none;
+    }
+
+    .dpad-group {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .nes-ctrl-btn {
+      font-family: 'Press Start 2P', monospace;
+      border: 3px solid #FCFCFC;
+      border-radius: 12px;
+      color: #FCFCFC;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.06s, filter 0.06s;
+      box-shadow: 0 5px 0 #000, inset 0 3px 0 rgba(255,255,255,0.28);
+    }
+
+    .nes-ctrl-btn:active,
+    .nes-ctrl-btn.pressed {
+      transform: translateY(4px);
+      box-shadow: 0 1px 0 #000, inset 0 2px 0 rgba(255,255,255,0.2);
+      filter: brightness(1.18);
+    }
+
+    .btn-dir {
+      width: 64px;
+      height: 54px;
+      background: linear-gradient(180deg, #4b5267 0%, #2d3242 100%);
+      font-size: 18px;
+    }
+
+    .btn-swim {
+      min-width: 132px;
+      height: 54px;
+      padding: 0 18px;
+      background: linear-gradient(180deg, #f83800 0%, #b81c00 100%);
+      font-size: 13px;
+      letter-spacing: 1px;
+    }
+
+    .desktop-hint {
+      font-size: 9px;
+      color: #a7b0cc;
+      text-align: center;
+      line-height: 1.6;
+      display: none;
+    }
+
+    @media (min-width: 768px) {
+      .desktop-hint {
+        display: block;
+      }
+      .btn-dir {
+        width: 58px;
+        height: 46px;
+      }
+      .btn-swim {
+        height: 46px;
+      }
+    }
+
+    /* =========================================================================
+       RETRO NES MODALS (HOW TO PLAY, QUIZ POP-UP, RESULT SCREEN)
+       ========================================================================= */
+    .nes-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 30;
+      background: rgba(0, 12, 48, 0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px;
+    }
+
+    .nes-overlay.hidden {
+      display: none !important;
+    }
+
+    .nes-dialog {
+      width: 100%;
+      max-width: 640px;
+      max-height: 92%;
+      overflow-y: auto;
+      background: #000000;
+      border: 4px solid #FCFCFC;
+      box-shadow: 0 0 0 4px #0058F8, 0 14px 36px rgba(0,0,0,0.92);
+      border-radius: 10px;
+      padding: 18px 18px 20px;
+      color: #FCFCFC;
+    }
+
+    .nes-badge {
+      display: inline-block;
+      background: #FCA044;
+      color: #000;
+      padding: 5px 10px;
+      font-size: 9px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+
+    .nes-title {
+      font-size: clamp(13px, 2.5vw, 17px);
+      line-height: 1.5;
+      color: #F8D878;
+      margin: 0 0 12px;
+    }
+
+    .nes-text {
+      font-size: clamp(10px, 1.85vw, 11.5px);
+      line-height: 1.75;
+      color: #FCFCFC;
+      margin: 0 0 14px;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      margin-bottom: 14px;
+    }
+
+    .quiz-option-btn {
+      width: 100%;
+      text-align: left;
+      background: #141c38;
+      color: #FCFCFC;
+      border: 3px solid #6888FC;
+      border-radius: 8px;
+      padding: 11px 12px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(9px, 1.75vw, 11px);
+      line-height: 1.6;
+      cursor: pointer;
+      transition: background 0.12s, border-color 0.12s, transform 0.08s;
+    }
+
+    .quiz-option-btn:hover:not(:disabled) {
+      background: #1f2e61;
+      border-color: #FCA044;
+    }
+
+    .quiz-option-btn:active:not(:disabled) {
+      transform: scale(0.99);
+    }
+
+    .quiz-option-btn.correct {
+      background: #005800;
+      border-color: #58F858;
+      color: #FCFCFC;
+    }
+
+    .quiz-option-btn.wrong {
+      background: #680000;
+      border-color: #F85858;
+      color: #FCFCFC;
+    }
+
+    .quiz-feedback {
+      border-radius: 8px;
+      padding: 12px;
+      font-size: clamp(9px, 1.75vw, 11px);
+      line-height: 1.7;
+      margin-bottom: 14px;
+    }
+
+    .quiz-feedback.hint {
+      background: #3b2400;
+      border: 3px solid #FCA044;
+      color: #F8D878;
+    }
+
+    .quiz-feedback.success {
+      background: #003800;
+      border: 3px solid #58F858;
+      color: #B8F8B8;
+    }
+
+    .nes-action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .nes-btn {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(10px, 1.85vw, 11.5px);
+      padding: 12px 15px;
+      border: 3px solid #FCFCFC;
+      border-radius: 8px;
+      cursor: pointer;
+      color: #FCFCFC;
+      box-shadow: 0 4px 0 #222;
+    }
+
+    .nes-btn:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 #222;
+    }
+
+    .nes-btn-primary {
+      background: #00A800;
+    }
+
+    .nes-btn-warning {
+      background: #D82800;
+    }
+
+    .nes-btn-secondary {
+      background: #3b4466;
+    }
+
+    .stat-box {
+      background: #0f162e;
+      border: 3px solid #6888FC;
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 16px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: clamp(10px, 1.9vw, 12px);
+      border-bottom: 2px dashed #2c396b;
+      padding-bottom: 8px;
+    }
+
+    .stat-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .controls-legend {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      background: #101730;
+      border: 2px solid #6888FC;
+      border-radius: 8px;
+      padding: 13px;
+      margin-bottom: 16px;
+      font-size: 9.5px;
+      line-height: 1.7;
+    }
+  </style>
+</head>
+<body>
+  <div id="game-shell">
+    <div id="canvas-wrapper">
+      <canvas id="gameCanvas"></canvas>
+      <button id="sound-btn" type="button" aria-label="Suara">SUARA: ON</button>
+
+      <!-- CLASSIC NES HOMESCREEN OVERLAY -->
+      <div id="homescreen-overlay">
+        <div class="classic-ribbon">CLASSIC<br>SERIES</div>
+        <div class="cover-card">
+          <canvas id="cover-diorama" width="440" height="132"></canvas>
+          <h1 class="cover-title">
+            <span class="c-red">M</span><span class="c-green">A</span><span class="c-yellow">R</span><span class="c-blue">I</span><span class="c-orange">O</span>
+            <span class="c-white">WORLD</span>
+            <span class="c-yellow">2-2</span>
+          </h1>
+          <div class="cover-subtitle">
+            PANCASILA DIVING: HAK DAN KEWAJIBAN (SD 5)
+          </div>
+          <div class="home-btn-row">
+            <button id="play-now-btn" type="button" class="btn-play-now">PLAY NOW ▶</button>
+            <button id="how-to-btn" type="button" class="btn-how-to">CARA BERMAIN</button>
+          </div>
+          <div class="press-start-hint">TEKAN PLAY NOW ATAU ENTER / SPASI</div>
+        </div>
+      </div>
+
+      <!-- How To Play Modal Overlay -->
+      <div id="howto-overlay" class="nes-overlay hidden">
+        <div class="nes-dialog">
+          <div class="nes-badge">PANDUAN PETUALANGAN • SD KELAS 5</div>
+          <h2 class="nes-title">CARA BERMAIN MARIO WORLD 2-2</h2>
+          <p class="nes-text">
+            Bantu Mario menyelam melintasi dasar laut World 2-2 sambil belajar <strong>Pendidikan Pancasila: Hak dan Kewajiban di Rumah, Sekolah, dan Masyarakat</strong>!
+          </p>
+          <div class="controls-legend">
+            <div>🏊 <strong>BERENANG NAIK:</strong> Tekan berulang <strong>SPASI / PANAH ATAS</strong> atau tombol <strong>SWIM ▲</strong> untuk mengayuh naik. Jika diam, Mario akan tenggelam perlahan.</div>
+            <div>⬅️➡️ <strong>GERAK KIRI / KANAN:</strong> Gunakan <strong>Panah Kiri/Kanan</strong> atau tombol D-Pad di layar.</div>
+            <div>🐙🐟 <strong>HINDARI MUSUH:</strong> Cumi-cumi <em>Blooper</em> dan ikan <em>Cheep Cheep</em> tidak bisa diinjak di dalam air—hindari agar koinmu tidak berkurang!</div>
+            <div>❓ <strong>5 BLOK KUIS "?":</strong> Sundul atau sentuh Blok "?" untuk menjawab soal. Jika salah, ada petunjuk &amp; tombol <strong>Coba Lagi</strong> hingga benar!</div>
+            <div>🏁 <strong>GARIS FINISH FLEKSIBEL:</strong> Sentuh Tiang Bendera / Pipa Hijau di ujung kanan kapan saja untuk melihat rincian skor akhirmu.</div>
+          </div>
+          <div class="nes-action-row" style="justify-content: space-between;">
+            <button id="close-howto-btn" type="button" class="nes-btn nes-btn-secondary">◀ KEMBALI</button>
+            <button id="howto-start-btn" type="button" class="nes-btn nes-btn-primary">PLAY NOW ▶</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quiz Pop-Up Modal -->
+      <div id="quiz-overlay" class="nes-overlay hidden">
+        <div class="nes-dialog">
+          <div id="quiz-badge" class="nes-badge">BLOK KUIS #1 • DI RUMAH</div>
+          <h2 id="quiz-question" class="nes-title">Pertanyaan akan muncul di sini...</h2>
+          <div id="quiz-options" class="quiz-options"></div>
+          <div id="quiz-feedback" class="quiz-feedback hidden"></div>
+          <div id="quiz-actions" class="nes-action-row"></div>
+        </div>
+      </div>
+
+      <!-- Result Screen Overlay -->
+      <div id="result-overlay" class="nes-overlay hidden">
+        <div class="nes-dialog">
+          <div class="nes-badge">STAGE CLEAR • WORLD 2-2</div>
+          <h2 class="nes-title">SELAMAT! LEVEL SELESAI!</h2>
+          <p id="result-subtitle" class="nes-text">Kamu berhasil mencapai garis finish bawah laut!</p>
+          <div class="stat-box">
+            <div class="stat-row">
+              <span>TOTAL SKOR AKHIR</span>
+              <span id="res-score" style="color:#F8D878;">000000</span>
+            </div>
+            <div class="stat-row">
+              <span>KOIN TERKUMPUL</span>
+              <span id="res-coins" style="color:#FCA044;">x00</span>
+            </div>
+            <div class="stat-row">
+              <span>KUIS TERJAWAB</span>
+              <span id="res-quiz" style="color:#58F858;">0 dari 5</span>
+            </div>
+            <div class="stat-row">
+              <span>PREDIKAT BELAJAR</span>
+              <span id="res-rank" style="color:#6888FC;">HEBAT!</span>
+            </div>
+          </div>
+          <div class="nes-action-row" style="justify-content: center;">
+            <button id="home-menu-btn" type="button" class="nes-btn nes-btn-secondary">⌂ MENU UTAMA</button>
+            <button id="replay-btn" type="button" class="nes-btn nes-btn-primary">↻ MAIN LAGI</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- On-Screen Responsive Touch Controls -->
+    <div id="touch-controls" class="controls-dimmed">
+      <div class="dpad-group">
+        <button id="btn-left" class="nes-ctrl-btn btn-dir" type="button" aria-label="Kiri">◀</button>
+        <button id="btn-right" class="nes-ctrl-btn btn-dir" type="button" aria-label="Kanan">▶</button>
+      </div>
+      <div class="desktop-hint">
+        KEYBOARD: [◀ ▶] Gerak • [SPASI / ▲] Kayuh Berenang
+      </div>
+      <button id="btn-swim" class="nes-ctrl-btn btn-swim" type="button" aria-label="Berenang">SWIM ▲</button>
+    </div>
+  </div>
+
+  <script>
+    /**
+     * ============================================================================
+     * MARIO WORLD 2-2: PANCASILA DIVING (HAK DAN KEWAJIBAN - SD KELAS 5)
+     * Dilengkapi Classic NES Cartridge Cover Homescreen & Live Animated Diorama
+     * ============================================================================
+     */
+
+    // ----------------------------------------------------------------------------
+    // 1. RETRO 8-BIT WEB AUDIO SYNTHESIZER (NO EXTERNAL SOUND FILES)
+    // ----------------------------------------------------------------------------
+    class RetroAudio {
+      constructor() {
+        this.ctx = null;
+        this.muted = false;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (AudioCtx) {
+            this.ctx = new AudioCtx();
+          }
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      toggleMute() {
+        this.muted = !this.muted;
+        return !this.muted;
+      }
+
+      playTone(freq, duration, type = 'square', volume = 0.08, delay = 0, slideTo = null) {
+        if (this.muted) return;
+        this.init();
+        if (!this.ctx) return;
+
+        const now = this.ctx.currentTime + delay;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, now);
+        if (slideTo) {
+          osc.frequency.exponentialRampToValueAtTime(slideTo, now + duration);
+        }
+
+        gain.gain.setValueAtTime(volume, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc.start(now);
+        osc.stop(now + duration);
+      }
+
+      swim() {
+        this.playTone(230, 0.11, 'triangle', 0.11, 0, 490);
+      }
+
+      coin() {
+        this.playTone(987.77, 0.07, 'square', 0.07, 0);
+        this.playTone(1318.51, 0.22, 'square', 0.07, 0.07);
+      }
+
+      blockHit() {
+        this.playTone(180, 0.08, 'square', 0.09, 0, 320);
+      }
+
+      quizCorrect() {
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((n, idx) => {
+          this.playTone(n, 0.12, 'square', 0.08, idx * 0.09);
+        });
+      }
+
+      quizWrong() {
+        this.playTone(190, 0.16, 'sawtooth', 0.09, 0, 145);
+        this.playTone(140, 0.24, 'sawtooth', 0.09, 0.15, 105);
+      }
+
+      hurt() {
+        this.playTone(420, 0.08, 'sawtooth', 0.1, 0, 210);
+        this.playTone(300, 0.14, 'sawtooth', 0.1, 0.08, 130);
+      }
+
+      stageClear() {
+        const melody = [
+          { f: 392.00, d: 0.11, t: 0.00 },
+          { f: 523.25, d: 0.11, t: 0.12 },
+          { f: 659.25, d: 0.11, t: 0.24 },
+          { f: 783.99, d: 0.11, t: 0.36 },
+          { f: 659.25, d: 0.11, t: 0.48 },
+          { f: 1046.50, d: 0.42, t: 0.60 }
+        ];
+        melody.forEach(m => this.playTone(m.f, m.d, 'square', 0.08, m.t));
+      }
+    }
+
+    const sfx = new RetroAudio();
+
+    // ----------------------------------------------------------------------------
+    // 2. EDUCATIONAL QUIZ DATA (SD KELAS 5 - PENDIDIKAN PANCASILA)
+    // ----------------------------------------------------------------------------
+    const QUIZ_BANK = [
+      {
+        id: 1,
+        context: "LINGKUNGAN RUMAH",
+        question: "Sebelum berangkat ke sekolah, Beni merapikan tempat tidurnya dan berpamitan kepada orang tua. Tindakan Beni tersebut merupakan contoh pelaksanaan...",
+        options: [
+          "A. Hak anak di sekolah",
+          "B. Kewajiban anak di rumah",
+          "C. Hak anak di masyarakat",
+          "D. Kewajiban warga negara"
+        ],
+        correctIndex: 1,
+        hint: "Petunjuk: Merapikan kamar dan menghormati orang tua adalah tanggung jawab yang harus dilakukan anak di lingkungan keluarga.",
+        explanation: "Tepat sekali! Merapikan tempat tidur dan menghormati orang tua adalah kewajiban anak di rumah agar tercipta keluarga yang rukun dan tertib."
+      },
+      {
+        id: 2,
+        context: "LINGKUNGAN SEKOLAH",
+        question: "Di sekolah, setiap siswa memiliki hak dan kewajiban yang seimbang. Manakah di bawah ini yang merupakan HAK siswa di sekolah?",
+        options: [
+          "A. Melaksanakan piket kebersihan kelas sesuai jadwal",
+          "B. Memakai seragam sekolah dengan rapi dan lengkap",
+          "C. Mendapatkan bimbingan dan ilmu pelajaran dari guru",
+          "D. Mengikuti upacara bendera setiap hari Senin dengan tertib"
+        ],
+        correctIndex: 2,
+        hint: "Petunjuk: Bedakan antara sesuatu yang harus kamu kerjakan (kewajiban) dan sesuatu yang pantas kamu terima sebagai pelajar (hak).",
+        explanation: "Benar! Mendapatkan pengajaran dan bimbingan dari guru adalah hak setiap siswa, sedangkan piket, berseragam, dan upacara adalah kewajiban."
+      },
+      {
+        id: 3,
+        context: "LINGKUNGAN MASYARAKAT",
+        question: "Warga di lingkungan tempat tinggal Siti mengadakan kerja bakti membersihkan selokan agar tidak banjir saat musim hujan. Sikap Siti sebaiknya...",
+        options: [
+          "A. Berpura-pura tidur karena merasa masih anak-anak",
+          "B. Ikut membantu sesuai kemampuan, seperti menyapu daun kering",
+          "C. Membuang sampah ke selokan yang sedang dibersihkan",
+          "D. Bermain di jalan dan mengganggu warga yang bekerja"
+        ],
+        correctIndex: 1,
+        hint: "Petunjuk: Menjaga kebersihan lingkungan masyarakat adalah kewajiban bersama seluruh warga, termasuk anak-anak sesuai kemampuannya.",
+        explanation: "Hebat! Ikut membantu kerja bakti sesuai kemampuan adalah wujud pelaksanaan kewajiban menjaga kebersihan lingkungan masyarakat."
+      },
+      {
+        id: 4,
+        context: "KESEIMBANGAN HAK & KEWAJIBAN",
+        question: "Bagaimanakah hubungan yang benar antara pelaksanaan kewajiban dan pemenuhan hak dalam kehidupan sehari-hari?",
+        options: [
+          "A. Menuntut hak terlebih dahulu tanpa mau melakukan kewajiban",
+          "B. Melakukan kewajiban hanya jika mendapat hadiah uang",
+          "C. Mendahulukan kewajiban dengan tanggung jawab sebelum menuntut hak",
+          "D. Mengabaikan kewajiban di rumah karena sudah belajar di sekolah"
+        ],
+        correctIndex: 2,
+        hint: "Petunjuk: Agar hidup rukun dan adil di rumah, sekolah, maupun masyarakat, mana yang harus kita kerjakan lebih dulu?",
+        explanation: "Luar biasa! Kewajiban dan hak harus berjalan seimbang dengan mendahulukan pelaksanaan kewajiban secara bertanggung jawab."
+      },
+      {
+        id: 5,
+        context: "NILAI PANCASILA DI MASYARAKAT",
+        question: "Saat bermusyawarah menentukan jadwal ronda malam atau kegiatan kampung, setiap warga bebas menyampaikan pendapat. Kewajiban kita terhadap pendapat orang lain adalah...",
+        options: [
+          "A. Memotong pembicaraan jika pendapatnya berbeda dengan kita",
+          "B. Menghargai dan mendengarkan pendapat tersebut dengan lapang dada",
+          "C. Memaksakan kehendak agar usulan kita yang dipilih",
+          "D. Meninggalkan rapat karena usulan kita tidak diterima"
+        ],
+        correctIndex: 1,
+        hint: "Petunjuk: Ingat nilai Sila ke-4 Pancasila tentang menghormati hak berpendapat orang lain saat bermusyawarah.",
+        explanation: "Sempurna! Menghargai pendapat orang lain adalah kewajiban kita dalam bermusyawarah sesuai nilai Sila ke-4 Pancasila."
+      }
+    ];
+
+    // ----------------------------------------------------------------------------
+    // 3. PIXEL ART SPRITE PAINTER (8-BIT NES MARIO, BLOOPER, CHEEP CHEEP, TILES)
+    // ----------------------------------------------------------------------------
+    const PALETTE = {
+      '.': null,
+      'R': '#D82800', // Mario Red Cap / Overalls
+      'B': '#884400', // Brown Hair / Shirt / Boots
+      'S': '#FCA044', // Skin / Gold
+      'Y': '#F8D878', // Bright Yellow Button / Coin Highlight
+      'W': '#FCFCFC', // Pure White
+      'K': '#000000', // Pure Black
+      'G': '#00A800', // Coral Green Main
+      'L': '#80D010', // Coral Green Light
+      'D': '#005800', // Coral Green Dark
+      'P': '#F878F8', // Pink Coral
+      'M': '#C84C0C', // Dark Orange / Bronze
+      'O': '#F83800', // Cheep Cheep Orange
+      'A': '#BCBCBC', // Gray Wing
+    };
+
+    const MARIO_SWIM_1 = [
+      ".....RRRRR......",
+      "....RRRRRRRRR...",
+      "....BBBSSKS.....",
+      "...BSBSSSKSB....",
+      "...BSBBSSSKBBB..",
+      "...BBSSSSKKKK...",
+      ".....SSSSSSS....",
+      "..BBBBBRRBB.....",
+      ".BBBBBRRRBBSS...",
+      "SSBBBBRRRRRS....",
+      ".S..RRRRRRRR....",
+      "....RRRRRRRR....",
+      "...RRRR..RRRR...",
+      "..BBB......BBB..",
+      ".BBBB......BBBB.",
+      "................"
+    ];
+
+    const MARIO_SWIM_2 = [
+      ".....RRRRR......",
+      "....RRRRRRRRR...",
+      "....BBBSSKS.....",
+      "...BSBSSSKSB....",
+      "...BSBBSSSKBBB..",
+      "...BBSSSSKKKK...",
+      ".....SSSSSSS....",
+      "...BBBRRRRBBB...",
+      "..BBBBRYYRRRRSS.",
+      ".SSBBBRRRRRRS...",
+      "....RRRRRRRR....",
+      "....RRRRRRRR....",
+      "....RRRR.RRRR...",
+      "...BBB....BBB...",
+      "..BBBB....BBBB..",
+      "................"
+    ];
+
+    const MARIO_SINK = [
+      ".....RRRRR......",
+      "....RRRRRRRRR...",
+      "....BBBSSKS.....",
+      "...BSBSSSKSB....",
+      "...BSBBSSSKBBB..",
+      "...BBSSSSKKKK...",
+      ".....SSSSSSS....",
+      "....BBRRRRBB....",
+      "...BBBRYYRBBB...",
+      "..BBBBRRRRBBBB..",
+      "..SSRRRRRRRRSS..",
+      "..SSRRRRRRRRSS..",
+      "....RRR..RRR....",
+      "...BBB....BBB...",
+      "..BBBB....BBBB..",
+      "................"
+    ];
+
+    const BLOOPER_SPRITE = [
+      "......WWWW......",
+      ".....WWWWWW.....",
+      "....WWWWWWWW....",
+      "...WWWWWWWWWW...",
+      "..WWWWWWWWWWWW..",
+      "..WWKKWWWWKKWW..",
+      "..WWKKWWWWKKWW..",
+      "..WWWWWWWWWWWW..",
+      "...WWWWWWWWWW...",
+      "....WWWWWWWW....",
+      "...WW.WWWW.WW...",
+      "..WW..WWWW..WW..",
+      ".WW..WW..WW..WW.",
+      ".WW..WW..WW..WW.",
+      "................",
+      "................"
+    ];
+
+    const CHEEP_SPRITE = [
+      "......OOOO......",
+      "....OOOOOOOO....",
+      "...OOOWWOOOOOO..",
+      "..OOOWKKOOOOOOO.",
+      ".OOOOWKKOOOOOOOO",
+      "OOOOOOWWOOAAOOOO",
+      "OOOOOOOOOAAAAOOO",
+      "OOOOOOWWWAAAAOOO",
+      ".OOOOOWWWWAAOOOO",
+      "..OOOOWWWWWOOOO.",
+      "...OOOWWWWOOOO..",
+      ".....OOOOOO.....",
+      "................",
+      "................",
+      "................",
+      "................"
+    ];
+
+    function drawPixelMatrix(targetCtx, matrix, x, y, pixelSize, flipX = false) {
+      const h = matrix.length;
+      const w = matrix[0].length;
+      targetCtx.save();
+      if (flipX) {
+        targetCtx.translate(x + w * pixelSize, y);
+        targetCtx.scale(-1, 1);
+        x = 0;
+        y = 0;
+      }
+      for (let r = 0; r < h; r++) {
+        const row = matrix[r];
+        for (let c = 0; c < w; c++) {
+          const ch = row[c];
+          const color = PALETTE[ch];
+          if (color) {
+            targetCtx.fillStyle = color;
+            targetCtx.fillRect(
+              Math.floor(x + c * pixelSize),
+              Math.floor(y + r * pixelSize),
+              Math.ceil(pixelSize),
+              Math.ceil(pixelSize)
+            );
+          }
+        }
+      }
+      targetCtx.restore();
+    }
+
+    // ----------------------------------------------------------------------------
+    // 4. WORLD 2-2 LEVEL DESIGN & GAME STATE
+    // ----------------------------------------------------------------------------
+    const TILE = 32;
+    const VIEW_W = 800;
+    const VIEW_H = 480;
+    const WATER_SURFACE_Y = 66;
+    const LEVEL_COLS = 135;
+    const LEVEL_WIDTH = LEVEL_COLS * TILE;
+
+    const GROUND_SEGMENTS = [
+      [0, 22],
+      [25, 46],
+      [50, 74],
+      [78, 102],
+      [106, 134]
+    ];
+
+    const PLATFORMS = [
+      [8, 10, 4, true],
+      [15, 7, 3, true],
+      [22, 9, 4, false],
+      [30, 9, 5, true],
+      [38, 6, 4, true],
+      [47, 10, 4, false],
+      [55, 8, 5, true],
+      [64, 6, 4, true],
+      [74, 9, 5, false],
+      [83, 8, 4, true],
+      [91, 6, 5, true],
+      [102, 10, 5, false],
+      [111, 8, 4, true],
+      [118, 10, 4, true]
+    ];
+
+    const INITIAL_QBLOCKS = [
+      { id: 0, col: 11, row: 7, answered: false },
+      { id: 1, col: 32, row: 5, answered: false },
+      { id: 2, col: 57, row: 10, answered: false },
+      { id: 3, col: 85, row: 5, answered: false },
+      { id: 4, col: 112, row: 5, answered: false }
+    ];
+
+    const COIN_COORDS = [
+      [5, 11], [6, 10], [7, 10], [8, 11],
+      [15, 5], [16, 5], [17, 5],
+      [23, 7], [24, 7],
+      [35, 11], [36, 11], [37, 11], [38, 11],
+      [43, 5], [44, 4], [45, 5],
+      [48, 8], [49, 8],
+      [61, 9], [62, 8], [63, 9],
+      [75, 7], [76, 7], [77, 7],
+      [88, 11], [89, 11], [90, 11],
+      [92, 4], [93, 4], [94, 4],
+      [103, 8], [104, 8], [105, 8],
+      [115, 7], [116, 7], [121, 8], [122, 8]
+    ];
+
+    const FINISH_X = 127 * TILE;
+
+    // ----------------------------------------------------------------------------
+    // 5. MAIN GAME ENGINE & DOM REFERENCES
+    // ----------------------------------------------------------------------------
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const dioramaCanvas = document.getElementById('cover-diorama');
+    const dioramaCtx = dioramaCanvas.getContext('2d');
+
+    const homescreenOverlay = document.getElementById('homescreen-overlay');
+    const howtoOverlay = document.getElementById('howto-overlay');
+    const quizOverlay = document.getElementById('quiz-overlay');
+    const resultOverlay = document.getElementById('result-overlay');
+    const touchControlsEl = document.getElementById('touch-controls');
+    const soundBtn = document.getElementById('sound-btn');
+
+    const keys = {
+      left: false,
+      right: false
+    };
+
+    let gameState = 'HOME'; // 'HOME', 'PLAYING', 'QUIZ', 'FINISHED'
+    let lastTimestamp = 0;
+    let globalFrame = 0;
+    let cameraX = 0;
+
+    let score = 0;
+    let coins = 0;
+    let timeRemaining = 400;
+    let timeAccumulator = 0;
+
+    let solidTiles = [];
+    let pinkCorals = [];
+    let qBlocks = [];
+    let coinItems = [];
+    let bubbles = [];
+    let floatingTexts = [];
+    let bloopers = [];
+    let cheepCheeps = [];
+
+    // Homescreen ambient demo bubbles
+    const homeBubbles = Array.from({ length: 14 }, (_, i) => ({
+      x: 40 + i * 56,
+      y: 90 + (i % 4) * 85,
+      r: (i % 2) + 2,
+      vy: -(24 + (i % 3) * 12),
+      wobble: i * 0.9
+    }));
+
+    const mario = {
+      x: 3 * TILE,
+      y: 9 * TILE,
+      w: 24,
+      h: 28,
+      vx: 0,
+      vy: 0,
+      facing: 1,
+      swimAnimTimer: 0,
+      invulnTimer: 0,
+      safeX: 3 * TILE,
+      safeY: 9 * TILE
+    };
+
+    function buildLevel() {
+      solidTiles = [];
+      pinkCorals = [];
+      qBlocks = INITIAL_QBLOCKS.map(b => ({
+        ...b,
+        x: b.col * TILE,
+        y: b.row * TILE,
+        w: TILE,
+        h: TILE,
+        bumpOffset: 0
+      }));
+
+      coinItems = COIN_COORDS.map(([c, r]) => ({
+        x: c * TILE + 8,
+        y: r * TILE + 6,
+        w: 16,
+        h: 20,
+        collected: false
+      }));
+
+      bubbles = [];
+      floatingTexts = [];
+
+      GROUND_SEGMENTS.forEach(([startC, endC]) => {
+        for (let c = startC; c <= endC; c++) {
+          solidTiles.push({ x: c * TILE, y: 13 * TILE, w: TILE, h: TILE, type: 'coral_stone' });
+          solidTiles.push({ x: c * TILE, y: 14 * TILE, w: TILE, h: TILE, type: 'coral_stone' });
+        }
+      });
+
+      PLATFORMS.forEach(([startC, row, widthTiles, hasPinkCoral]) => {
+        for (let i = 0; i < widthTiles; i++) {
+          const tx = (startC + i) * TILE;
+          const ty = row * TILE;
+          solidTiles.push({ x: tx, y: ty, w: TILE, h: TILE, type: 'coral_stone' });
+
+          if (hasPinkCoral && (i === 1 || i === widthTiles - 2)) {
+            pinkCorals.push({
+              x: tx + 4,
+              y: ty - 34,
+              w: 24,
+              h: 34
+            });
+          }
+        }
+      });
+
+      bloopers = [
+        { x: 20 * TILE, y: 5 * TILE, w: 28, h: 28, vx: 0, vy: 0, burstTimer: 0.4 },
+        { x: 42 * TILE, y: 4 * TILE, w: 28, h: 28, vx: 0, vy: 0, burstTimer: 0.9 },
+        { x: 59 * TILE, y: 8 * TILE, w: 28, h: 28, vx: 0, vy: 0, burstTimer: 0.2 },
+        { x: 89 * TILE, y: 5 * TILE, w: 28, h: 28, vx: 0, vy: 0, burstTimer: 0.6 },
+        { x: 114 * TILE, y: 4 * TILE, w: 28, h: 28, vx: 0, vy: 0, burstTimer: 0.3 }
+      ];
+
+      cheepCheeps = [
+        { x: 28 * TILE, y: 7 * TILE, w: 28, h: 24, speed: 68, homeX: 28 * TILE, baseY: 7 * TILE, phase: 0 },
+        { x: 46 * TILE, y: 11 * TILE, w: 28, h: 24, speed: 78, homeX: 46 * TILE, baseY: 11 * TILE, phase: 1.5 },
+        { x: 68 * TILE, y: 5 * TILE, w: 28, h: 24, speed: 74, homeX: 68 * TILE, baseY: 5 * TILE, phase: 2.3 },
+        { x: 81 * TILE, y: 10 * TILE, w: 28, h: 24, speed: 84, homeX: 81 * TILE, baseY: 10 * TILE, phase: 0.8 },
+        { x: 100 * TILE, y: 7 * TILE, w: 28, h: 24, speed: 76, homeX: 100 * TILE, baseY: 7 * TILE, phase: 3.1 },
+        { x: 120 * TILE, y: 9 * TILE, w: 28, h: 24, speed: 82, homeX: 120 * TILE, baseY: 9 * TILE, phase: 1.9 }
+      ];
+    }
+
+    function resetGame() {
+      score = 0;
+      coins = 0;
+      timeRemaining = 400;
+      timeAccumulator = 0;
+      cameraX = 0;
+
+      mario.x = 3 * TILE;
+      mario.y = 9 * TILE;
+      mario.vx = 0;
+      mario.vy = 0;
+      mario.facing = 1;
+      mario.swimAnimTimer = 0;
+      mario.invulnTimer = 0;
+      mario.safeX = 3 * TILE;
+      mario.safeY = 9 * TILE;
+
+      buildLevel();
+    }
+
+    function startNewGameFromHome() {
+      sfx.init();
+      sfx.coin();
+      resetGame();
+      homescreenOverlay.classList.add('hidden');
+      howtoOverlay.classList.add('hidden');
+      resultOverlay.classList.add('hidden');
+      quizOverlay.classList.add('hidden');
+      touchControlsEl.classList.remove('controls-dimmed');
+      gameState = 'PLAYING';
+      lastTimestamp = performance.now();
+    }
+
+    function returnToHomescreen() {
+      sfx.init();
+      resetGame();
+      resultOverlay.classList.add('hidden');
+      quizOverlay.classList.add('hidden');
+      howtoOverlay.classList.add('hidden');
+      homescreenOverlay.classList.remove('hidden');
+      touchControlsEl.classList.add('controls-dimmed');
+      gameState = 'HOME';
+    }
+
+    // ----------------------------------------------------------------------------
+    // 6. SWIMMING INPUT & PARTICLES
+    // ----------------------------------------------------------------------------
+    function triggerSwimStroke() {
+      if (gameState !== 'PLAYING') return;
+      mario.vy = -175;
+      mario.swimAnimTimer = 0.26;
+      sfx.swim();
+
+      for (let i = 0; i < 2; i++) {
+        bubbles.push({
+          x: mario.x + (mario.facing === 1 ? mario.w - 4 : 4) + (Math.random() * 6 - 3),
+          y: mario.y + 4 + i * 5,
+          r: i === 0 ? 3 : 2,
+          vy: -(65 + Math.random() * 35),
+          wobble: Math.random() * Math.PI * 2
+        });
+      }
+    }
+
+    function addFloatingText(text, x, y, color = '#FCFCFC') {
+      floatingTexts.push({
+        text,
+        x,
+        y,
+        vy: -36,
+        life: 0.95,
+        color
+      });
+    }
+
+    function rectsOverlap(a, b) {
+      return (
+        a.x < b.x + b.w &&
+        a.x + a.w > b.x &&
+        a.y < b.y + b.h &&
+        a.y + a.h > b.y
+      );
+    }
+
+    // ----------------------------------------------------------------------------
+    // 7. QUIZ POP-UP SYSTEM (RETRYABLE ON WRONG ANSWER)
+    // ----------------------------------------------------------------------------
+    let activeQuizBlock = null;
+
+    function openQuizModal(qBlock) {
+      gameState = 'QUIZ';
+      keys.left = false;
+      keys.right = false;
+      activeQuizBlock = qBlock;
+
+      const data = QUIZ_BANK[qBlock.id];
+      const badgeEl = document.getElementById('quiz-badge');
+      const questionEl = document.getElementById('quiz-question');
+      const optionsEl = document.getElementById('quiz-options');
+      const feedbackEl = document.getElementById('quiz-feedback');
+      const actionsEl = document.getElementById('quiz-actions');
+
+      badgeEl.textContent = `BLOK KUIS #${qBlock.id + 1} • ${data.context}`;
+      questionEl.textContent = data.question;
+      feedbackEl.className = 'quiz-feedback hidden';
+      feedbackEl.textContent = '';
+      actionsEl.innerHTML = '';
+      optionsEl.innerHTML = '';
+
+      data.options.forEach((optText, idx) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'quiz-option-btn';
+        btn.textContent = optText;
+        btn.addEventListener('click', () => handleQuizChoice(idx, btn));
+        optionsEl.appendChild(btn);
+      });
+
+      const skipBtn = document.createElement('button');
+      skipBtn.type = 'button';
+      skipBtn.className = 'nes-btn nes-btn-secondary';
+      skipBtn.textContent = 'Tutup Dulu';
+      skipBtn.addEventListener('click', closeQuizModal);
+      actionsEl.appendChild(skipBtn);
+
+      quizOverlay.classList.remove('hidden');
+    }
+
+    function handleQuizChoice(selectedIndex, clickedBtn) {
+      if (!activeQuizBlock) return;
+      const data = QUIZ_BANK[activeQuizBlock.id];
+      const optionsEl = document.getElementById('quiz-options');
+      const feedbackEl = document.getElementById('quiz-feedback');
+      const actionsEl = document.getElementById('quiz-actions');
+      const allBtns = Array.from(optionsEl.querySelectorAll('.quiz-option-btn'));
+
+      allBtns.forEach(b => (b.disabled = true));
+
+      if (selectedIndex === data.correctIndex) {
+        clickedBtn.classList.add('correct');
+        sfx.quizCorrect();
+
+        if (!activeQuizBlock.answered) {
+          activeQuizBlock.answered = true;
+          score += 1000;
+          coins += 10;
+          addFloatingText('+1000', activeQuizBlock.x, activeQuizBlock.y - 12, '#58F858');
+        }
+
+        feedbackEl.className = 'quiz-feedback success';
+        feedbackEl.innerHTML = `<strong>BENAR! (+1000 SKOR &amp; +10 KOIN)</strong><br>${data.explanation}`;
+
+        actionsEl.innerHTML = '';
+        const continueBtn = document.createElement('button');
+        continueBtn.type = 'button';
+        continueBtn.className = 'nes-btn nes-btn-primary';
+        continueBtn.textContent = '▶ LANJUT BERMAIN';
+        continueBtn.addEventListener('click', closeQuizModal);
+        actionsEl.appendChild(continueBtn);
+      } else {
+        clickedBtn.classList.add('wrong');
+        sfx.quizWrong();
+
+        feedbackEl.className = 'quiz-feedback hint';
+        feedbackEl.innerHTML = `<strong>KURANG TEPAT!</strong><br>${data.hint}<br><em>Ayo coba jawab lagi atau sundul blok ini kembali nanti!</em>`;
+
+        actionsEl.innerHTML = '';
+
+        const retryBtn = document.createElement('button');
+        retryBtn.type = 'button';
+        retryBtn.className = 'nes-btn nes-btn-warning';
+        retryBtn.textContent = '↻ COBA LAGI';
+        retryBtn.addEventListener('click', () => {
+          openQuizModal(activeQuizBlock);
+        });
+        actionsEl.appendChild(retryBtn);
+
+        const closeBtn = document.createElement('button');
+        closeBtn.type = 'button';
+        closeBtn.className = 'nes-btn nes-btn-secondary';
+        closeBtn.textContent = 'Kembali Berenang';
+        closeBtn.addEventListener('click', closeQuizModal);
+        actionsEl.appendChild(closeBtn);
+      }
+    }
+
+    function closeQuizModal() {
+      quizOverlay.classList.add('hidden');
+      activeQuizBlock = null;
+      gameState = 'PLAYING';
+      lastTimestamp = performance.now();
+    }
+
+    // ----------------------------------------------------------------------------
+    // 8. FINISH LINE & RESULT SCREEN
+    // ----------------------------------------------------------------------------
+    function triggerStageFinish() {
+      if (gameState === 'FINISHED') return;
+      gameState = 'FINISHED';
+      sfx.stageClear();
+
+      const timeBonus = Math.max(0, Math.floor(timeRemaining)) * 5;
+      score += timeBonus;
+
+      const answeredCount = qBlocks.filter(b => b.answered).length;
+      document.getElementById('res-score').textContent = String(score).padStart(6, '0');
+      document.getElementById('res-coins').textContent = 'x' + String(coins).padStart(2, '0');
+      document.getElementById('res-quiz').textContent = `${answeredCount} dari 5`;
+
+      let rank = 'PEMULA HEBAT!';
+      if (answeredCount === 5) rank = 'JUARA PANCASILA! ★★★';
+      else if (answeredCount >= 3) rank = 'SISWA TELADAN! ★★';
+      else if (answeredCount >= 1) rank = 'PENJELAJAH LAUT! ★';
+
+      document.getElementById('res-rank').textContent = rank;
+      document.getElementById('result-subtitle').textContent =
+        answeredCount === 5
+          ? 'Luar biasa! Semua 5 soal Hak & Kewajiban terjawab benar!'
+          : 'Kamu mencapai garis finish! Coba jawab lebih banyak Blok "?" untuk skor maksimal.';
+
+      resultOverlay.classList.remove('hidden');
+    }
+
+    // ----------------------------------------------------------------------------
+    // 9. UPDATE SIMULATION (HOME ATTRACT MODE & PLAYING MODE)
+    // ----------------------------------------------------------------------------
+    function update(dt) {
+      globalFrame++;
+
+      // Animate Homescreen ambient underwater scenery
+      if (gameState === 'HOME') {
+        for (const hb of homeBubbles) {
+          hb.y += hb.vy * dt;
+          hb.wobble += 4 * dt;
+          hb.x += Math.sin(hb.wobble) * 14 * dt;
+          if (hb.y <= WATER_SURFACE_Y + 4) {
+            hb.y = VIEW_H - 36;
+          }
+        }
+        return;
+      }
+
+      if (gameState !== 'PLAYING') return;
+
+      timeAccumulator += dt;
+      if (timeAccumulator >= 0.7) {
+        timeAccumulator -= 0.7;
+        if (timeRemaining > 0) {
+          timeRemaining--;
+        }
+      }
+
+      const maxSwimSpeedX = 148;
+      const accelX = 480;
+      const waterDragX = 360;
+
+      if (keys.left && !keys.right) {
+        mario.vx -= accelX * dt;
+        mario.facing = -1;
+      } else if (keys.right && !keys.left) {
+        mario.vx += accelX * dt;
+        mario.facing = 1;
+      } else {
+        if (mario.vx > 0) {
+          mario.vx = Math.max(0, mario.vx - waterDragX * dt);
+        } else if (mario.vx < 0) {
+          mario.vx = Math.min(0, mario.vx + waterDragX * dt);
+        }
+      }
+      mario.vx = Math.max(-maxSwimSpeedX, Math.min(maxSwimSpeedX, mario.vx));
+
+      // Underwater low gravity (~30% of land gravity)
+      const underwaterGravity = 260;
+      const maxSinkSpeed = 115;
+      mario.vy += underwaterGravity * dt;
+      if (mario.vy > maxSinkSpeed) {
+        mario.vy = maxSinkSpeed;
+      }
+
+      if (mario.swimAnimTimer > 0) mario.swimAnimTimer -= dt;
+      if (mario.invulnTimer > 0) mario.invulnTimer -= dt;
+
+      // Horizontal collision
+      mario.x += mario.vx * dt;
+      if (mario.x < 0) {
+        mario.x = 0;
+        mario.vx = 0;
+      }
+      if (mario.x > LEVEL_WIDTH - mario.w) {
+        mario.x = LEVEL_WIDTH - mario.w;
+      }
+
+      for (const tile of solidTiles) {
+        if (rectsOverlap(mario, tile)) {
+          if (mario.vx > 0) mario.x = tile.x - mario.w;
+          else if (mario.vx < 0) mario.x = tile.x + tile.w;
+          mario.vx = 0;
+        }
+      }
+
+      for (const qb of qBlocks) {
+        if (rectsOverlap(mario, qb)) {
+          if (mario.vx > 0) mario.x = qb.x - mario.w;
+          else if (mario.vx < 0) mario.x = qb.x + qb.w;
+          mario.vx = 0;
+          if (!qb.answered) {
+            qb.bumpOffset = -6;
+            sfx.blockHit();
+            openQuizModal(qb);
+            return;
+          }
+        }
+      }
+
+      // Vertical collision & top water surface boundary
+      mario.y += mario.vy * dt;
+      if (mario.y < WATER_SURFACE_Y) {
+        mario.y = WATER_SURFACE_Y;
+        if (mario.vy < 0) mario.vy = 10;
+      }
+
+      let groundedOnSafeFloor = false;
+      for (const tile of solidTiles) {
+        if (rectsOverlap(mario, tile)) {
+          if (mario.vy > 0) {
+            mario.y = tile.y - mario.h;
+            mario.vy = 0;
+            groundedOnSafeFloor = true;
+          } else if (mario.vy < 0) {
+            mario.y = tile.y + tile.h;
+            mario.vy = 20;
+            sfx.blockHit();
+          }
+        }
+      }
+
+      if (groundedOnSafeFloor && mario.y < 13 * TILE) {
+        mario.safeX = mario.x;
+        mario.safeY = mario.y - 8;
+      }
+
+      for (const qb of qBlocks) {
+        if (qb.bumpOffset < 0) {
+          qb.bumpOffset = Math.min(0, qb.bumpOffset + 35 * dt);
+        }
+        if (rectsOverlap(mario, qb)) {
+          if (mario.vy < 0) {
+            mario.y = qb.y + qb.h;
+            mario.vy = 25;
+          } else if (mario.vy > 0) {
+            mario.y = qb.y - mario.h;
+            mario.vy = 0;
+          }
+          if (!qb.answered) {
+            qb.bumpOffset = -8;
+            sfx.blockHit();
+            openQuizModal(qb);
+            return;
+          }
+        }
+      }
+
+      // Underwater abyss check
+      if (mario.y > VIEW_H + 10) {
+        sfx.hurt();
+        coins = Math.max(0, coins - 2);
+        score = Math.max(0, score - 200);
+        addFloatingText('AWAS JURANG! -200', mario.safeX, mario.safeY - 16, '#F87878');
+        mario.x = mario.safeX;
+        mario.y = Math.max(WATER_SURFACE_Y + 20, mario.safeY - 24);
+        mario.vx = 0;
+        mario.vy = 0;
+        mario.invulnTimer = 2.0;
+      }
+
+      const targetCamX = mario.x - VIEW_W * 0.36;
+      cameraX = Math.max(0, Math.min(LEVEL_WIDTH - VIEW_W, targetCamX));
+
+      // Rising air bubbles
+      for (let i = bubbles.length - 1; i >= 0; i--) {
+        const b = bubbles[i];
+        b.y += b.vy * dt;
+        b.wobble += 7 * dt;
+        b.x += Math.sin(b.wobble) * 18 * dt;
+        if (b.y <= WATER_SURFACE_Y + 2) {
+          bubbles.splice(i, 1);
+        }
+      }
+
+      // Coin pickups
+      for (const c of coinItems) {
+        if (!c.collected && rectsOverlap(mario, c)) {
+          c.collected = true;
+          coins += 1;
+          score += 200;
+          sfx.coin();
+          addFloatingText('+200', c.x, c.y - 6, '#F8D878');
+        }
+      }
+
+      // Blooper AI
+      for (const bl of bloopers) {
+        const distX = Math.abs(bl.x - mario.x);
+        if (distX < 460) {
+          bl.burstTimer -= dt;
+          if (bl.burstTimer <= 0) {
+            const dirX = mario.x < bl.x ? -1 : 1;
+            const dirY = mario.y < bl.y ? -1 : 0.35;
+            bl.vx = dirX * (58 + Math.random() * 24);
+            bl.vy = dirY < 0 ? -98 : -48;
+            bl.burstTimer = 1.05 + Math.random() * 0.35;
+          }
+          bl.vy += 105 * dt;
+          bl.vx *= 0.985;
+          bl.x += bl.vx * dt;
+          bl.y += bl.vy * dt;
+
+          if (bl.y < WATER_SURFACE_Y + 12) {
+            bl.y = WATER_SURFACE_Y + 12;
+            bl.vy = 20;
+          }
+          if (bl.y > 12 * TILE) {
+            bl.y = 12 * TILE;
+            bl.vy = -40;
+          }
+        }
+
+        if (mario.invulnTimer <= 0 && rectsOverlap(mario, bl)) {
+          damageMario(bl.x, bl.y);
+        }
+      }
+
+      // Cheep Cheep AI
+      for (const cc of cheepCheeps) {
+        cc.x -= cc.speed * dt;
+        cc.phase += 3.2 * dt;
+        cc.y = cc.baseY + Math.sin(cc.phase) * 7;
+
+        if (cc.x < cc.homeX - 18 * TILE) {
+          cc.x = cc.homeX + 12 * TILE;
+        }
+
+        if (mario.invulnTimer <= 0 && rectsOverlap(mario, cc)) {
+          damageMario(cc.x, cc.y);
+        }
+      }
+
+      for (let i = floatingTexts.length - 1; i >= 0; i--) {
+        const ft = floatingTexts[i];
+        ft.y += ft.vy * dt;
+        ft.life -= dt;
+        if (ft.life <= 0) floatingTexts.splice(i, 1);
+      }
+
+      if (mario.x + mario.w >= FINISH_X) {
+        triggerStageFinish();
+      }
+    }
+
+    function damageMario(enemyX) {
+      sfx.hurt();
+      mario.invulnTimer = 2.0;
+      coins = Math.max(0, coins - 2);
+      score = Math.max(0, score - 200);
+      mario.vx = mario.x < enemyX ? -110 : 110;
+      mario.vy = -85;
+      addFloatingText('-2 KOIN', mario.x, mario.y - 12, '#F87878');
+    }
+
+    // ----------------------------------------------------------------------------
+    // 10. RENDERING (WORLD 2-2 + COVER DIORAMA + HUD)
+    // ----------------------------------------------------------------------------
+    function drawCoralStoneTile(targetCtx, x, y, size) {
+      targetCtx.fillStyle = '#00A800';
+      targetCtx.fillRect(x, y, size, size);
+
+      targetCtx.fillStyle = '#80D010';
+      targetCtx.fillRect(x + 2, y + 2, size - 4, 4);
+      targetCtx.fillRect(x + 2, y + 2, 4, size - 4);
+
+      targetCtx.fillStyle = '#005800';
+      targetCtx.fillRect(x, y + size - 4, size, 4);
+      targetCtx.fillRect(x + size - 4, y, 4, size);
+      targetCtx.fillRect(x + 8, y + 10, 6, 4);
+      targetCtx.fillRect(x + 18, y + 18, 6, 5);
+      targetCtx.fillRect(x + 6, y + 21, 5, 4);
+    }
+
+    function drawPinkCoralAt(targetCtx, sx, sy) {
+      targetCtx.fillStyle = '#F878F8';
+      targetCtx.fillRect(sx + 9, sy + 4, 6, 30);
+      targetCtx.fillRect(sx + 2, sy + 10, 7, 5);
+      targetCtx.fillRect(sx + 2, sy + 4, 5, 10);
+      targetCtx.fillRect(sx + 15, sy + 14, 7, 5);
+      targetCtx.fillRect(sx + 17, sy + 7, 5, 11);
+
+      targetCtx.fillStyle = '#FCB8FC';
+      targetCtx.fillRect(sx + 10, sy + 5, 2, 26);
+      targetCtx.fillRect(sx + 3, sy + 5, 2, 7);
+      targetCtx.fillRect(sx + 18, sy + 8, 2, 7);
+    }
+
+    function drawPinkCoral(coral) {
+      const sx = Math.floor(coral.x - cameraX);
+      const sy = Math.floor(coral.y);
+      if (sx + coral.w < -20 || sx > VIEW_W + 20) return;
+      drawPinkCoralAt(ctx, sx, sy);
+    }
+
+    function drawMiniQBlock(targetCtx, sx, sy, size) {
+      const shimmerCycle = Math.floor(globalFrame / 14) % 3;
+      const bodyColors = ['#FCA044', '#F8B800', '#E45C10'];
+      targetCtx.fillStyle = bodyColors[shimmerCycle];
+      targetCtx.fillRect(sx, sy, size, size);
+
+      targetCtx.fillStyle = '#F8D878';
+      targetCtx.fillRect(sx + 2, sy + 2, size - 4, 3);
+      targetCtx.fillRect(sx + 2, sy + 2, 3, size - 4);
+
+      targetCtx.strokeStyle = '#000000';
+      targetCtx.lineWidth = 2;
+      targetCtx.strokeRect(sx + 1, sy + 1, size - 2, size - 2);
+
+      targetCtx.fillStyle = '#000000';
+      targetCtx.fillRect(sx + 4, sy + 4, 2, 2);
+      targetCtx.fillRect(sx + size - 6, sy + 4, 2, 2);
+      targetCtx.fillRect(sx + 4, sy + size - 6, 2, 2);
+      targetCtx.fillRect(sx + size - 6, sy + size - 6, 2, 2);
+
+      targetCtx.font = `bold ${Math.floor(size * 0.54)}px "Press Start 2P", monospace`;
+      targetCtx.textAlign = 'center';
+      targetCtx.textBaseline = 'middle';
+      targetCtx.fillStyle = '#000000';
+      targetCtx.fillText('?', sx + size / 2 + 2, sy + size / 2 + 2);
+      targetCtx.fillStyle = '#FCFCFC';
+      targetCtx.fillText('?', sx + size / 2 + 1, sy + size / 2 + 1);
+    }
+
+    function drawQuestionBlock(qb) {
+      const sx = Math.floor(qb.x - cameraX);
+      const sy = Math.floor(qb.y + qb.bumpOffset);
+      if (sx + qb.w < -40 || sx > VIEW_W + 40) return;
+
+      if (qb.answered) {
+        ctx.fillStyle = '#884400';
+        ctx.fillRect(sx, sy, qb.w, qb.h);
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(sx + 1, sy + 1, qb.w - 2, qb.h - 2);
+        ctx.fillStyle = '#502800';
+        ctx.fillRect(sx + 4, sy + 4, 3, 3);
+        ctx.fillRect(sx + qb.w - 7, sy + 4, 3, 3);
+        ctx.fillRect(sx + 4, sy + qb.h - 7, 3, 3);
+        ctx.fillRect(sx + qb.w - 7, sy + qb.h - 7, 3, 3);
+        return;
+      }
+
+      drawMiniQBlock(ctx, sx, sy, qb.w);
+    }
+
+    function drawFinishMonument() {
+      const sx = Math.floor(FINISH_X - cameraX);
+      if (sx < -120 || sx > VIEW_W + 120) return;
+
+      const groundY = 13 * TILE;
+
+      const poleX = sx + 8;
+      const poleTopY = WATER_SURFACE_Y + 34;
+      ctx.fillStyle = '#FCFCFC';
+      ctx.fillRect(poleX, poleTopY, 6, groundY - poleTopY);
+
+      ctx.fillStyle = '#F8D878';
+      ctx.beginPath();
+      ctx.arc(poleX + 3, poleTopY, 8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      const wave = Math.sin(globalFrame * 0.12) * 3;
+      ctx.fillStyle = '#00A800';
+      ctx.beginPath();
+      ctx.moveTo(poleX + 6, poleTopY + 12);
+      ctx.lineTo(poleX + 46, poleTopY + 26 + wave);
+      ctx.lineTo(poleX + 6, poleTopY + 40);
+      ctx.closePath();
+      ctx.fill();
+      ctx.strokeStyle = '#FCFCFC';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      const pipeX = sx + 48;
+      const pipeY = groundY - 84;
+      const pipeW = 64;
+      const pipeH = 84;
+
+      ctx.fillStyle = '#00A800';
+      ctx.fillRect(pipeX + 6, pipeY + 24, pipeW - 12, pipeH - 24);
+      ctx.fillStyle = '#80D010';
+      ctx.fillRect(pipeX + 12, pipeY + 24, 10, pipeH - 24);
+      ctx.fillStyle = '#005800';
+      ctx.fillRect(pipeX + pipeW - 16, pipeY + 24, 10, pipeH - 24);
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(pipeX + 6, pipeY + 24, pipeW - 12, pipeH - 24);
+
+      ctx.fillStyle = '#00A800';
+      ctx.fillRect(pipeX, pipeY, pipeW, 24);
+      ctx.fillStyle = '#80D010';
+      ctx.fillRect(pipeX + 6, pipeY + 3, 12, 18);
+      ctx.fillStyle = '#005800';
+      ctx.fillRect(pipeX + pipeW - 14, pipeY + 3, 10, 18);
+      ctx.strokeRect(pipeX, pipeY, pipeW, 24);
+
+      ctx.fillStyle = '#F8D878';
+      ctx.font = '10px "Press Start 2P", monospace';
+      ctx.textAlign = 'center';
+      ctx.fillText('FINISH', pipeX + pipeW / 2, pipeY - 12);
+    }
+
+    function drawHUD() {
+      ctx.fillStyle = '#FCFCFC';
+      ctx.font = '13px "Press Start 2P", monospace';
+      ctx.textBaseline = 'top';
+
+      ctx.textAlign = 'left';
+      ctx.fillText('MARIO', 24, 12);
+      ctx.fillText(String(score).padStart(6, '0'), 24, 30);
+
+      const coinSpin = Math.floor(globalFrame / 10) % 4;
+      const coinWidths = [10, 6, 3, 6];
+      const cw = coinWidths[coinSpin];
+      ctx.fillStyle = '#FCA044';
+      ctx.fillRect(216 + (10 - cw) / 2, 29, cw, 14);
+      ctx.fillStyle = '#F8D878';
+      ctx.fillRect(216 + (10 - cw) / 2 + 1, 31, Math.max(1, cw - 3), 10);
+
+      ctx.fillStyle = '#FCFCFC';
+      ctx.fillText('x' + String(coins).padStart(2, '0'), 232, 30);
+
+      if (gameState !== 'HOME') {
+        const answeredCount = qBlocks.filter(b => b.answered).length;
+        ctx.fillStyle = '#F8D878';
+        ctx.fillText(`KUIS:${answeredCount}/5`, 328, 30);
+      }
+
+      ctx.fillStyle = '#FCFCFC';
+      ctx.textAlign = 'center';
+      ctx.fillText('WORLD', 525, 12);
+      ctx.fillText('2-2', 525, 30);
+
+      ctx.textAlign = 'right';
+      ctx.fillText('TIME', VIEW_W - 135, 12);
+      ctx.fillText(String(timeRemaining).padStart(3, '0'), VIEW_W - 135, 30);
+    }
+
+    // Renders the animated classic cover diorama inside the Homescreen box
+    function renderCoverDiorama() {
+      if (gameState !== 'HOME') return;
+      const dw = dioramaCanvas.width;
+      const dh = dioramaCanvas.height;
+
+      dioramaCtx.fillStyle = '#0058F8';
+      dioramaCtx.fillRect(0, 0, dw, dh);
+
+      // Subtle light rays underwater
+      dioramaCtx.fillStyle = 'rgba(104, 136, 252, 0.25)';
+      dioramaCtx.fillRect(45, 0, 28, dh);
+      dioramaCtx.fillRect(190, 0, 42, dh);
+      dioramaCtx.fillRect(340, 0, 26, dh);
+
+      // Left coral cliff & pink coral
+      drawCoralStoneTile(dioramaCtx, 0, dh - 28, 28);
+      drawCoralStoneTile(dioramaCtx, 28, dh - 28, 28);
+      drawCoralStoneTile(dioramaCtx, 28, dh - 56, 28);
+      drawPinkCoralAt(dioramaCtx, 30, dh - 90);
+
+      // Floating coral platform with two "?" blocks on right
+      drawCoralStoneTile(dioramaCtx, 240, dh - 24, 24);
+      drawCoralStoneTile(dioramaCtx, 264, dh - 24, 24);
+      drawCoralStoneTile(dioramaCtx, 288, dh - 24, 24);
+      drawCoralStoneTile(dioramaCtx, 312, dh - 24, 24);
+      drawMiniQBlock(dioramaCtx, 264, dh - 52, 26);
+      drawMiniQBlock(dioramaCtx, 290, dh - 52, 26);
+
+      // Animated Blooper floating on left
+      const blooperY = 24 + Math.sin(globalFrame * 0.07) * 9;
+      drawPixelMatrix(dioramaCtx, BLOOPER_SPRITE, 84, blooperY, 2.2, false);
+
+      // Animated Mario swimming in center
+      const marioY = 34 + Math.sin(globalFrame * 0.08 + 1) * 7;
+      const marioSprite = Math.floor(globalFrame / 10) % 2 === 0 ? MARIO_SWIM_1 : MARIO_SWIM_2;
+      drawPixelMatrix(dioramaCtx, marioSprite, 174, marioY, 3.2, false);
+
+      // Rising bubbles behind Mario
+      for (let i = 0; i < 4; i++) {
+        const by = ((dh - ((globalFrame * 1.4 + i * 32) % dh)));
+        const bx = 152 + Math.sin(globalFrame * 0.1 + i) * 6;
+        dioramaCtx.strokeStyle = '#FCFCFC';
+        dioramaCtx.lineWidth = 2;
+        dioramaCtx.beginPath();
+        dioramaCtx.arc(bx, by, 3 + (i % 2), 0, Math.PI * 2);
+        dioramaCtx.stroke();
+      }
+
+      // Animated Cheep Cheep swimming on right
+      const cheepY = 22 + Math.cos(globalFrame * 0.09) * 6;
+      drawPixelMatrix(dioramaCtx, CHEEP_SPRITE, 336, cheepY, 2.2, false);
+
+      // Spinning golden coin on far right
+      const spinPhase = Math.floor(globalFrame / 9) % 4;
+      const cw = [12, 8, 4, 8][spinPhase];
+      dioramaCtx.fillStyle = '#FCA044';
+      dioramaCtx.fillRect(398 + (12 - cw) / 2, 54, cw, 18);
+      dioramaCtx.fillStyle = '#F8D878';
+      dioramaCtx.fillRect(398 + (12 - cw) / 2 + 1, 56, Math.max(1, cw - 3), 14);
+    }
+
+    function render() {
+      // 1. Deep Marine Blue Underwater Background (#0058F8)
+      ctx.fillStyle = '#0058F8';
+      ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+
+      // 2. Light Sky-Blue Top Band
+      ctx.fillStyle = '#6888FC';
+      ctx.fillRect(0, 0, VIEW_W, WATER_SURFACE_Y);
+
+      // 3. White Animated Pixel Wavy Water Surface Line
+      ctx.fillStyle = '#FCFCFC';
+      const waveOffset = Math.floor(globalFrame * 0.15);
+      for (let wx = 0; wx < VIEW_W; wx += 8) {
+        const wy = WATER_SURFACE_Y - 3 + Math.round(Math.sin((wx + waveOffset * 8) * 0.08) * 2);
+        ctx.fillRect(wx, wy, 8, 4);
+      }
+
+      // 4. Pink Coral / Seaweed Ornaments
+      for (const coral of pinkCorals) {
+        drawPinkCoral(coral);
+      }
+
+      // 5. Green Coral Stone Seabed & Floating Platforms
+      for (const tile of solidTiles) {
+        const sx = Math.floor(tile.x - cameraX);
+        if (sx + tile.w < -TILE || sx > VIEW_W + TILE) continue;
+        drawCoralStoneTile(ctx, sx, Math.floor(tile.y), tile.w);
+      }
+
+      // 6. Five "?" Quiz Blocks
+      for (const qb of qBlocks) {
+        drawQuestionBlock(qb);
+      }
+
+      // 7. Spinning Golden/Bronze Pixel Coins
+      const spinPhase = Math.floor(globalFrame / 8) % 4;
+      const widths = [14, 10, 4, 10];
+      const curW = widths[spinPhase];
+      for (const c of coinItems) {
+        if (c.collected) continue;
+        const sx = Math.floor(c.x - cameraX);
+        if (sx < -24 || sx > VIEW_W + 24) continue;
+        const offsetX = Math.floor((14 - curW) / 2);
+
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(sx + offsetX - 1, c.y - 1, curW + 2, c.h + 2);
+        ctx.fillStyle = '#FCA044';
+        ctx.fillRect(sx + offsetX, c.y, curW, c.h);
+        if (curW > 4) {
+          ctx.fillStyle = '#F8D878';
+          ctx.fillRect(sx + offsetX + 2, c.y + 2, Math.max(2, curW - 5), c.h - 4);
+        }
+      }
+
+      // 8. Finish Monument
+      drawFinishMonument();
+
+      // 9. Enemy 1: Blooper
+      for (const bl of bloopers) {
+        const sx = Math.floor(bl.x - cameraX);
+        if (sx < -40 || sx > VIEW_W + 40) continue;
+        drawPixelMatrix(ctx, BLOOPER_SPRITE, sx - 2, Math.floor(bl.y) - 2, 2, false);
+      }
+
+      // 10. Enemy 2: Cheep Cheep
+      for (const cc of cheepCheeps) {
+        const sx = Math.floor(cc.x - cameraX);
+        if (sx < -40 || sx > VIEW_W + 40) continue;
+        drawPixelMatrix(ctx, CHEEP_SPRITE, sx - 2, Math.floor(cc.y) - 2, 2, false);
+      }
+
+      // 11. Main Character: 8-bit Mario Sprite
+      if (gameState !== 'HOME') {
+        const showMario = mario.invulnTimer <= 0 || Math.floor(globalFrame / 3) % 2 === 0;
+        if (showMario) {
+          let sprite = MARIO_SINK;
+          if (mario.swimAnimTimer > 0) {
+            sprite = Math.floor(globalFrame / 4) % 2 === 0 ? MARIO_SWIM_1 : MARIO_SWIM_2;
+          } else if (Math.abs(mario.vx) > 25) {
+            sprite = Math.floor(globalFrame / 7) % 2 === 0 ? MARIO_SWIM_1 : MARIO_SINK;
+          }
+          const mx = Math.floor(mario.x - cameraX - 4);
+          const my = Math.floor(mario.y - 2);
+          drawPixelMatrix(ctx, sprite, mx, my, 2, mario.facing === -1);
+        }
+      }
+
+      // 12. Bubbles (Gameplay + Homescreen ambient bubbles)
+      const activeBubbles = gameState === 'HOME' ? homeBubbles : bubbles;
+      for (const b of activeBubbles) {
+        const sx = gameState === 'HOME' ? Math.floor(b.x) : Math.floor(b.x - cameraX);
+        ctx.fillStyle = '#FCFCFC';
+        ctx.fillRect(sx, Math.floor(b.y), b.r * 2, b.r * 2);
+      }
+
+      // 13. Floating Score/Feedback Texts
+      for (const ft of floatingTexts) {
+        const sx = Math.floor(ft.x - cameraX);
+        ctx.font = '10px "Press Start 2P", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#000000';
+        ctx.fillText(ft.text, sx + 1, Math.floor(ft.y) + 1);
+        ctx.fillStyle = ft.color;
+        ctx.fillText(ft.text, sx, Math.floor(ft.y));
+      }
+
+      // 14. Classic NES Top HUD
+      drawHUD();
+
+      // 15. Render Homescreen Cover Diorama if on HOME
+      renderCoverDiorama();
+    }
+
+    // ----------------------------------------------------------------------------
+    // 11. RESPONSIVE CANVAS RESIZING & MAIN LOOP
+    // ----------------------------------------------------------------------------
+    function resizeCanvas() {
+      canvas.width = VIEW_W;
+      canvas.height = VIEW_H;
+      ctx.imageSmoothingEnabled = false;
+      dioramaCtx.imageSmoothingEnabled = false;
+      render();
+    }
+
+    function gameLoop(timestamp) {
+      if (!lastTimestamp) lastTimestamp = timestamp;
+      const rawDt = (timestamp - lastTimestamp) / 1000;
+      lastTimestamp = timestamp;
+      const dt = Math.min(rawDt, 0.05);
+
+      update(dt);
+      render();
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    // ----------------------------------------------------------------------------
+    // 12. EVENT LISTENERS (KEYBOARD, TOUCH D-PAD, HOMESCREEN & MODAL BUTTONS)
+    // ----------------------------------------------------------------------------
+    window.addEventListener('keydown', (e) => {
+      if (gameState === 'HOME' && howtoOverlay.classList.contains('hidden')) {
+        if (e.code === 'Enter' || e.code === 'Space') {
+          e.preventDefault();
+          startNewGameFromHome();
+          return;
+        }
+      }
+
+      if (gameState === 'PLAYING') {
+        if (e.code === 'ArrowLeft' || e.code === 'KeyA') {
+          keys.left = true;
+          e.preventDefault();
+        }
+        if (e.code === 'ArrowRight' || e.code === 'KeyD') {
+          keys.right = true;
+          e.preventDefault();
+        }
+        if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') {
+          if (!e.repeat) {
+            triggerSwimStroke();
+          }
+          e.preventDefault();
+        }
+      }
+    });
+
+    window.addEventListener('keyup', (e) => {
+      if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = false;
+      if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = false;
+    });
+
+    function bindHoldButton(btnEl, onDown, onUp) {
+      const press = (e) => {
+        e.preventDefault();
+        btnEl.classList.add('pressed');
+        onDown();
+      };
+      const release = (e) => {
+        e.preventDefault();
+        btnEl.classList.remove('pressed');
+        onUp();
+      };
+      btnEl.addEventListener('pointerdown', press);
+      btnEl.addEventListener('pointerup', release);
+      btnEl.addEventListener('pointerleave', release);
+      btnEl.addEventListener('pointercancel', release);
+    }
+
+    bindHoldButton(
+      document.getElementById('btn-left'),
+      () => { keys.left = true; },
+      () => { keys.left = false; }
+    );
+
+    bindHoldButton(
+      document.getElementById('btn-right'),
+      () => { keys.right = true; },
+      () => { keys.right = false; }
+    );
+
+    const btnSwim = document.getElementById('btn-swim');
+    btnSwim.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      btnSwim.classList.add('pressed');
+      triggerSwimStroke();
+    });
+    const releaseSwim = (e) => {
+      e.preventDefault();
+      btnSwim.classList.remove('pressed');
+    };
+    btnSwim.addEventListener('pointerup', releaseSwim);
+    btnSwim.addEventListener('pointerleave', releaseSwim);
+    btnSwim.addEventListener('pointercancel', releaseSwim);
+
+    // Homescreen Buttons
+    document.getElementById('play-now-btn').addEventListener('click', startNewGameFromHome);
+    document.getElementById('howto-start-btn').addEventListener('click', startNewGameFromHome);
+
+    document.getElementById('how-to-btn').addEventListener('click', () => {
+      sfx.init();
+      sfx.blockHit();
+      howtoOverlay.classList.remove('hidden');
+    });
+
+    document.getElementById('close-howto-btn').addEventListener('click', () => {
+      sfx.blockHit();
+      howtoOverlay.classList.add('hidden');
+    });
+
+    // Result Screen Buttons
+    document.getElementById('replay-btn').addEventListener('click', startNewGameFromHome);
+    document.getElementById('home-menu-btn').addEventListener('click', returnToHomescreen);
+
+    soundBtn.addEventListener('click', () => {
+      const isOn = sfx.toggleMute();
+      soundBtn.textContent = isOn ? 'SUARA: ON' : 'SUARA: OFF';
+    });
+
+    window.addEventListener('resize', resizeCanvas);
+
+    window.onload = function () {
+      resetGame();
+      resizeCanvas();
+      lastTimestamp = performance.now();
+      requestAnimationFrame(gameLoop);
+    };
+  </script>
+</body>
+</html>
